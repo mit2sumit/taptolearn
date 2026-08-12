@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+<meta name="theme-color" content="#F2F0FF">
+<title>Tap &amp; Say — first words for little learners</title>
+<style>
+:root{
+  --paper:#F2F0FF;
+  --ink:#241F3D;
+  --marigold:#FFC53D;
+  --berry:#FF5D73;
+  --sea:#2BB3C0;
+  --leaf:#5CC26A;
+  --plum:#9B6BD6;
+  --card:#FFFFFF;
+  --edge:rgba(36,31,61,.14);
+  --lift:0 6px 0 var(--ink);
+  --lift-sm:0 4px 0 var(--ink);
+  --r:22px;
+  --font:ui-rounded,"SF Pro Rounded","Nunito","Varela Round",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font);
+  font-weight:700;
+  overscroll-behavior-y:contain;
+  -webkit-text-size-adjust:100%;
+}
+button{font:inherit;color:inherit;border:none;background:none;cursor:pointer;touch-action:manipulation}
+:focus-visible{outline:4px solid var(--sea);outline-offset:3px;border-radius:8px}
+
+/* ---------- shell ---------- */
+.app{
+  max-width:760px;margin:0 auto;
+  min-height:100%;
+  padding:0 16px calc(28px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;
+}
+.bar{
+  position:sticky;top:0;z-index:20;
+  display:flex;align-items:center;gap:10px;
+  padding:calc(12px + env(safe-area-inset-top)) 0 12px;
+  background:linear-gradient(var(--paper) 72%,rgba(242,240,255,0));
+}
+.bar h1{
+  flex:1;margin:0;font-size:19px;letter-spacing:-.2px;font-weight:800;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.chip{
+  min-width:46px;height:46px;padding:0 14px;
+  border-radius:15px;background:var(--card);
+  border:3px solid var(--ink);box-shadow:var(--lift-sm);
+  display:grid;place-items:center;font-size:19px;font-weight:800;
+  transition:transform .08s,box-shadow .08s;
+}
+.chip:active{transform:translateY(4px);box-shadow:0 0 0 var(--ink)}
+.chip[aria-pressed="false"]{opacity:.45}
+
+/* ---------- home ---------- */
+.hero{padding:6px 2px 22px}
+.eyebrow{
+  font-size:12px;letter-spacing:2.4px;text-transform:uppercase;
+  font-weight:800;color:var(--plum);margin:0 0 8px;
+}
+.hero h2{
+  margin:0;font-size:clamp(34px,10vw,52px);line-height:.95;
+  letter-spacing:-1.6px;font-weight:900;
+}
+.hero h2 em{font-style:normal;color:var(--berry)}
+.hero p{margin:12px 0 0;font-weight:600;font-size:15px;opacity:.7;max-width:34ch}
+
+.tiles{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.tile{
+  position:relative;border-radius:26px;padding:18px 16px 16px;
+  border:3px solid var(--ink);box-shadow:var(--lift);
+  display:flex;flex-direction:column;gap:6px;align-items:flex-start;
+  text-align:left;transition:transform .1s,box-shadow .1s;
+  min-height:132px;
+}
+.tile:active{transform:translateY(6px);box-shadow:0 0 0 var(--ink)}
+.tile .glyph{font-size:38px;line-height:1}
+.tile .name{font-size:21px;font-weight:900;letter-spacing:-.4px}
+.tile .count{font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;opacity:.55}
+.tile:nth-child(5n+1){background:var(--marigold)}
+.tile:nth-child(5n+2){background:var(--sea)}
+.tile:nth-child(5n+3){background:var(--berry)}
+.tile:nth-child(5n+4){background:var(--leaf)}
+.tile:nth-child(5n+5){background:var(--plum)}
+.tile:nth-child(2n){transform:rotate(-.7deg)}
+.tile:nth-child(3n){transform:rotate(.8deg)}
+.tile:nth-child(2n):active,.tile:nth-child(3n):active{transform:translateY(6px)}
+
+/* ---------- modes ---------- */
+.modes{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  background:var(--card);border:3px solid var(--ink);border-radius:19px;
+  padding:6px;margin-bottom:18px;box-shadow:var(--lift-sm);
+}
+.mode{padding:11px 4px;border-radius:13px;font-size:15px;font-weight:800}
+.mode[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+
+/* ---------- cards ---------- */
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
+.card{
+  background:var(--card);border:3px solid var(--ink);border-radius:var(--r);
+  box-shadow:var(--lift-sm);padding:14px 8px 11px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  transition:transform .1s,box-shadow .1s;
+}
+.card:active{transform:translateY(4px);box-shadow:0 0 0 var(--ink)}
+.card .glyph{font-size:clamp(38px,11vw,46px);line-height:1.05}
+.card .label{font-size:15px;font-weight:800;letter-spacing:-.2px}
+.card .sub{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:.5}
+.swatch{width:56px;height:56px;border-radius:50%;border:3px solid var(--ink)}
+.dots{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;max-width:74px;min-height:12px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--berry);display:block}
+.pop{animation:pop .34s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+
+/* ---------- shuffle ---------- */
+.stage{display:flex;flex-direction:column;align-items:center;gap:18px;padding-top:6px}
+.big{
+  width:100%;max-width:380px;aspect-ratio:1/1;
+  background:var(--card);border:4px solid var(--ink);border-radius:34px;
+  box-shadow:0 9px 0 var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  transition:transform .1s,box-shadow .1s;
+}
+.big:active{transform:translateY(7px);box-shadow:0 2px 0 var(--ink)}
+.big .glyph{font-size:clamp(84px,30vw,140px);line-height:1}
+.big .label{font-size:clamp(30px,9vw,42px);font-weight:900;letter-spacing:-1px}
+.big .sub{font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;opacity:.5}
+.big .swatch{width:clamp(96px,28vw,140px);height:clamp(96px,28vw,140px)}
+.deal{animation:deal .32s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes deal{0%{transform:translateY(16px) rotate(-3deg);opacity:0}100%{transform:none;opacity:1}}
+.next{
+  background:var(--marigold);border:3px solid var(--ink);border-radius:18px;
+  box-shadow:var(--lift);padding:15px 34px;font-size:19px;font-weight:900;
+  transition:transform .1s,box-shadow .1s;
+}
+.next:active{transform:translateY(6px);box-shadow:0 0 0 var(--ink)}
+
+/* ---------- listen ---------- */
+.prompt{
+  width:100%;background:var(--ink);color:var(--paper);
+  border-radius:24px;padding:20px 18px;text-align:center;margin-bottom:16px;
+}
+.prompt .q{font-size:13px;letter-spacing:2px;text-transform:uppercase;opacity:.6;margin:0 0 12px}
+.replay{
+  background:var(--marigold);color:var(--ink);border-radius:16px;
+  padding:13px 26px;font-size:18px;font-weight:900;border:3px solid var(--paper);
+}
+.replay:active{transform:translateY(3px)}
+.streak{margin:14px 0 0;font-size:14px;font-weight:800;text-align:center;opacity:.65}
+.right{background:var(--leaf);animation:pop .34s ease}
+.wrong{animation:shake .34s}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+.foot{margin-top:auto;padding-top:26px;text-align:center;font-size:12px;font-weight:700;opacity:.4}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <button class="chip" id="back" hidden aria-label="Back to topics">←</button>
+    <h1 id="title">Tap &amp; Say</h1>
+    <button class="chip" id="sound" aria-pressed="true" aria-label="Turn sound off">🔊</button>
+  </header>
+  <main id="view"></main>
+  <p class="foot">Made for little hands · works offline</p>
+</div>
+
+<script>
+const DATA = {
+  letters:{name:"Alphabet",glyph:"🅰️",items:"A Apple 🍎,B Ball ⚽,C Cat 🐱,D Dog 🐶,E Elephant 🐘,F Fish 🐟,G Grapes 🍇,H Hat 🎩,I Igloo 🛖,J Jug 🫗,K Kite 🪁,L Lion 🦁,M Moon 🌙,N Nest 🪺,O Orange 🍊,P Pig 🐷,Q Queen 👑,R Rainbow 🌈,S Sun ☀️,T Tree 🌳,U Umbrella ☂️,V Violin 🎻,W Watermelon 🍉,X Xylophone 🎹,Y Yarn 🧶,Z Zebra 🦓".split(",").map(s=>{const[l,w,g]=s.split(" ");return{label:l,sub:w,glyph:g,say:l+", "+w}})},
+  numbers:{name:"Numbers",glyph:"7️⃣",items:"one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,sixteen,seventeen,eighteen,nineteen,twenty".split(",").map((w,i)=>({label:String(i+1),sub:w,say:w,dots:i<10?i+1:0}))},
+  colors:{name:"Colours",glyph:"🎨",items:[["Red","#F03E3E"],["Blue","#2F6BED"],["Yellow","#FFD43B"],["Green","#40B865"],["Orange","#FF8A28"],["Purple","#9B5DE5"],["Pink","#FF7EB6"],["Brown","#96603C"],["Black","#20202A"],["White","#FFFFFF"],["Grey","#9AA0AE"],["Gold","#D4A017"]].map(([n,c])=>({label:n,say:n,color:c}))},
+  animals:{name:"Animals",glyph:"🐘",items:"Cat 🐱,Dog 🐶,Cow 🐮,Horse 🐴,Sheep 🐑,Pig 🐷,Chicken 🐔,Duck 🦆,Rabbit 🐰,Mouse 🐭,Elephant 🐘,Lion 🦁,Tiger 🐯,Monkey 🐵,Bear 🐻,Panda 🐼,Giraffe 🦒,Zebra 🦓,Frog 🐸,Turtle 🐢,Fish 🐟,Whale 🐳,Owl 🦉,Penguin 🐧,Bee 🐝,Butterfly 🦋,Snake 🐍,Fox 🦊".split(",").map(s=>{const[n,g]=s.split(" ");return{label:n,glyph:g,say:n}})},
+  fruits:{name:"Fruits",glyph:"🍓",items:"Apple 🍎,Banana 🍌,Orange 🍊,Grapes 🍇,Strawberry 🍓,Watermelon 🍉,Pineapple 🍍,Mango 🥭,Peach 🍑,Pear 🍐,Cherry 🍒,Lemon 🍋,Kiwi 🥝,Coconut 🥥,Avocado 🥑,Blueberry 🫐,Tomato 🍅,Melon 🍈".split(",").map(s=>{const[n,g]=s.split(" ");return{label:n,glyph:g,say:n}})}
+};
+const PRAISE=["Yes!","Well done!","Great job!","That's right!","Perfect!"];
+
+let state={cat:null,mode:"learn",item:null,options:[],streak:0,sound:true};
+const view=document.getElementById("view");
+const title=document.getElementById("title");
+const backBtn=document.getElementById("back");
+const soundBtn=document.getElementById("sound");
+
+/* ---------- speech ---------- */
+let voice=null;
+function pickVoice(){
+  const v=speechSynthesis.getVoices().filter(x=>x.lang.startsWith("en"));
+  voice=v.find(x=>/female|samantha|karen|zira|google us/i.test(x.name))||v.find(x=>x.localService)||v[0]||null;
+}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function say(text,rate){
+  if(!state.sound||!("speechSynthesis" in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=rate||.82;u.pitch=1.12;u.volume=1;
+  if(voice){u.voice=voice;u.lang=voice.lang;}else{u.lang="en-US";}
+  speechSynthesis.speak(u);
+}
+soundBtn.onclick=()=>{
+  state.sound=!state.sound;
+  soundBtn.setAttribute("aria-pressed",state.sound);
+  soundBtn.textContent=state.sound?"🔊":"🔇";
+  soundBtn.setAttribute("aria-label",state.sound?"Turn sound off":"Turn sound on");
+  if(state.sound)say("Sound on");else speechSynthesis.cancel();
+};
+backBtn.onclick=()=>{state.cat=null;state.mode="learn";render();};
+
+/* ---------- card builders ---------- */
+function face(item,big){
+  if(item.color){
+    return '<span class="swatch" style="background:'+item.color+'"></span>';
+  }
+  if(item.dots!==undefined){
+    let d='<span class="glyph">'+item.label+'</span>';
+    if(item.dots)d+='<span class="dots">'+'<i></i>'.repeat(item.dots)+'</span>';
+    return d;
+  }
+  return '<span class="glyph">'+item.glyph+'</span>'+(big?'':'');
+}
+function cardHTML(item,i,cls){
+  return '<button class="card '+(cls||'')+'" data-i="'+i+'" aria-label="'+item.say+'">'+
+    face(item)+
+    '<span class="label">'+item.label+'</span>'+
+    (item.sub?'<span class="sub">'+item.sub+'</span>':'')+
+  '</button>';
+}
+const rand=n=>Math.floor(Math.random()*n);
+const shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(p=>p[1]);
+
+/* ---------- views ---------- */
+function render(){
+  if(!state.cat)return home();
+  const cat=DATA[state.cat];
+  title.textContent=cat.name;
+  backBtn.hidden=false;
+  let html='<div class="modes" role="tablist">';
+  [["learn","Learn"],["shuffle","Shuffle"],["listen","Listen"]].forEach(([k,l])=>{
+    html+='<button class="mode" role="tab" data-mode="'+k+'" aria-selected="'+(state.mode===k)+'">'+l+'</button>';
+  });
+  html+='</div><div id="panel"></div>';
+  view.innerHTML=html;
+  view.querySelectorAll(".mode").forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;render();});
+  ({learn:learnView,shuffle:shuffleView,listen:listenView})[state.mode]();
+}
+
+function home(){
+  title.textContent="Tap & Say";
+  backBtn.hidden=true;
+  let html='<section class="hero"><p class="eyebrow">Ages 2 to 6</p>'+
+    '<h2>Tap a picture.<br><em>Hear the word.</em></h2>'+
+    '<p>Five little topics, three ways to play. No signup, no timers, nothing to buy.</p></section>'+
+    '<div class="tiles">';
+  Object.keys(DATA).forEach(k=>{
+    const c=DATA[k];
+    html+='<button class="tile" data-cat="'+k+'"><span class="glyph">'+c.glyph+'</span>'+
+      '<span class="name">'+c.name+'</span>'+
+      '<span class="count">'+c.items.length+' cards</span></button>';
+  });
+  view.innerHTML=html+'</div>';
+  view.querySelectorAll(".tile").forEach(b=>b.onclick=()=>{
+    state.cat=b.dataset.cat;state.mode="learn";state.streak=0;
+    say(DATA[state.cat].name);render();
+  });
+}
+
+function learnView(){
+  const items=DATA[state.cat].items;
+  const p=document.getElementById("panel");
+  p.innerHTML='<div class="grid">'+items.map((it,i)=>cardHTML(it,i)).join("")+'</div>';
+  p.querySelectorAll(".card").forEach(b=>b.onclick=()=>{
+    const it=items[b.dataset.i];
+    say(it.say);
+    b.classList.remove("pop");void b.offsetWidth;b.classList.add("pop");
+  });
+}
+
+function shuffleView(){
+  const items=DATA[state.cat].items;
+  const p=document.getElementById("panel");
+  p.innerHTML='<div class="stage"><button class="big" id="bigcard"></button>'+
+    '<button class="next" id="nextbtn">Next →</button></div>';
+  const card=document.getElementById("bigcard");
+  function draw(speak){
+    let it;do{it=items[rand(items.length)]}while(items.length>1&&it===state.item);
+    state.item=it;
+    card.innerHTML=face(it,true)+'<span class="label">'+it.label+'</span>'+
+      (it.sub?'<span class="sub">'+it.sub+'</span>':'');
+    card.setAttribute("aria-label",it.say);
+    card.classList.remove("deal");void card.offsetWidth;card.classList.add("deal");
+    if(speak)say(it.say);
+  }
+  card.onclick=()=>say(state.item.say);
+  document.getElementById("nextbtn").onclick=()=>draw(true);
+  draw(false);
+}
+
+function listenView(){
+  const items=DATA[state.cat].items;
+  const p=document.getElementById("panel");
+  p.innerHTML='<div class="prompt"><p class="q">Which one is it?</p>'+
+    '<button class="replay" id="replay">🔊 Say it again</button></div>'+
+    '<div class="grid" id="opts"></div>'+
+    '<p class="streak" id="streak"></p>';
+  const opts=document.getElementById("opts");
+  const streakEl=document.getElementById("streak");
+  let target=null,locked=false;
+
+  function round(){
+    locked=false;
+    const pool=shuffle(items.slice()).slice(0,Math.min(4,items.length));
+    target=pool[rand(pool.length)];
+    opts.innerHTML=pool.map((it,i)=>cardHTML(it,i)).join("");
+    opts.querySelectorAll(".card").forEach((b,i)=>b.onclick=()=>choose(pool[i],b));
+    streakEl.textContent=state.streak?"⭐ "+state.streak+" in a row":"";
+    setTimeout(()=>say(target.say),260);
+  }
+  function choose(it,btn){
+    if(locked)return;
+    if(it===target){
+      locked=true;state.streak++;
+      btn.classList.add("right");
+      say(PRAISE[rand(PRAISE.length)],1);
+      setTimeout(round,1100);
+    }else{
+      state.streak=0;streakEl.textContent="";
+      btn.classList.remove("wrong");void btn.offsetWidth;btn.classList.add("wrong");
+      setTimeout(()=>say(target.say),340);
+    }
+  }
+  document.getElementById("replay").onclick=()=>say(target.say);
+  round();
+}
+
+render();
+</script>
+</body>
+</html>
