@@ -1,0 +1,48 @@
+{
+  "name": "Tap & Say \u2014 Free picture flashcards for toddlers and preschoolers",
+  "short_name": "Tap & Say",
+  "description": "Tap a picture to hear the word. Alphabet, numbers, colours, shapes, animals and more for ages 2 to 6.",
+  "start_url": "/?src=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F2F0FF",
+  "theme_color": "#F2F0FF",
+  "lang": "en",
+  "categories": [
+    "education",
+    "kids"
+  ],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Learn the alphabet",
+      "url": "/alphabet/"
+    },
+    {
+      "name": "Learn numbers 1 to 20",
+      "url": "/numbers/"
+    },
+    {
+      "name": "Learn colours",
+      "url": "/colours/"
+    },
+    {
+      "name": "Learn shapes",
+      "url": "/shapes/"
+    }
+  ]
+}
